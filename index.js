@@ -1,14 +1,19 @@
-'use strict';
-
 const express = require('express');
 const cors = require('cors');
 const morgan = require('morgan');
+const Places = require('./models/places');
+const bodyParser = require('body-parser');
+
 
 const { PORT, CLIENT_ORIGIN } = require('./config');
 const { dbConnect } = require('./db-mongoose');
 // const {dbConnect} = require('./db-knex');
 
+
+
 const app = express();
+
+app.use(bodyParser.json());
 
 app.use(
   morgan(process.env.NODE_ENV === 'production' ? 'common' : 'dev', {
@@ -21,6 +26,37 @@ app.use(
     origin: CLIENT_ORIGIN
   })
 );
+
+app.get('/api/places', (req, res, next) => {
+  Places.find()
+    .then(results => {
+      console.log('get is running');
+      if(results) {
+        res.json(results);
+      } else {
+        next();
+      }
+    })
+    .catch(err => {
+      next(err);
+    });
+});
+
+app.post('/api/places', (req, res, next) => {
+  console.log('REQ BODY', req.body);
+  const { place } = req.body;
+
+  const newPlace = { place };
+
+  Places.create(newPlace)
+    .then(result => {
+      console.log('post is running');
+      res.location(req.originalUrl).status(201).json(result);
+    })
+    .catch(err => {
+      next(err);
+    });
+});
 
 function runServer(port = PORT) {
   const server = app
