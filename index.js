@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const morgan = require('morgan');
 const Places = require('./models/places');
+const NewSession = require('./models/new-session');
 const bodyParser = require('body-parser');
 
 
@@ -52,6 +53,19 @@ app.post('/api/places', (req, res, next) => {
     .then(result => {
       console.log('post is running');
       res.location(req.originalUrl).status(201).json(result);
+    })
+    .catch(err => {
+      next(err);
+    });
+});
+
+app.post('/api/session', (req, res, next) => {
+  console.log('Create new session running');
+
+  NewSession.create({active: true})
+    .then(result => {
+      console.log('RESULT', result);
+      res.location(`${req.originalUrl}`).status(201).json(result);
     })
     .catch(err => {
       next(err);
