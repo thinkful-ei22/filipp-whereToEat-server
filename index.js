@@ -28,9 +28,10 @@ app.use(
   })
 );
 
-app.get('/api/places', (req, res, next) => {
-  const { sessionId } = req.body;
+app.get('/api/places/:sessionId', (req, res, next) => {
+  const { sessionId } = req.params;
   const currentSession = sessionId;
+  console.log('currentSession', currentSession);
   Places.find({'sessionId':`${currentSession}`})
     .then(results => {
       console.log('get all is running');
@@ -46,8 +47,9 @@ app.get('/api/places', (req, res, next) => {
 });
 
 
-app.get('/api/results', (req, res, next) => {
-  const { sessionId } = req.body;
+
+app.get('/api/results/:sessionId', (req, res, next) => {
+  const { sessionId } = req.params;
   const currentSession = sessionId;
   Places.find({'sessionId':`${currentSession}`})
     .then(results => {
