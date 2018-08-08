@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 
 const placeSchema = new mongoose.Schema({
   place: { type: String, required: true },
+  sessionId: { type: String, required: true }
 });
 
 placeSchema.set('toObject', {

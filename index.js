@@ -29,9 +29,11 @@ app.use(
 );
 
 app.get('/api/places', (req, res, next) => {
-  Places.find()
+  const { sessionId } = req.body;
+  const currentSession = sessionId;
+  Places.find({'sessionId':`${currentSession}`})
     .then(results => {
-      console.log('get is running');
+      console.log('get all is running');
       if(results) {
         res.json(results);
       } else {
@@ -43,11 +45,31 @@ app.get('/api/places', (req, res, next) => {
     });
 });
 
+
+app.get('/api/results', (req, res, next) => {
+  const { sessionId } = req.body;
+  const currentSession = sessionId;
+  Places.find({'sessionId':`${currentSession}`})
+    .then(results => {
+      console.log('get popular is running');
+      if(results) {
+        res.json(results);
+      } else {
+        next();
+      }
+    })
+    .catch(err => {
+      next(err);
+    });
+});
+
+
+
 app.post('/api/places', (req, res, next) => {
   console.log('REQ BODY', req.body);
-  const { place } = req.body;
+  const { place, sessionId } = req.body;
 
-  const newPlace = { place };
+  const newPlace = { place, sessionId };
 
   Places.create(newPlace)
     .then(result => {
@@ -65,7 +87,7 @@ app.post('/api/session', (req, res, next) => {
   NewSession.create({active: true})
     .then(result => {
       console.log('RESULT', result);
-      res.location(`${req.originalUrl}`).status(201).json(result);
+      res.location(req.originalUrl).status(201).json(result);
     })
     .catch(err => {
       next(err);
