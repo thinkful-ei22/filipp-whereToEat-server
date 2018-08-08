@@ -46,16 +46,20 @@ app.get('/api/places/:sessionId', (req, res, next) => {
     });
 });
 
-
-
 app.get('/api/results/:sessionId', (req, res, next) => {
   const { sessionId } = req.params;
   const currentSession = sessionId;
-  Places.find({'sessionId':`${currentSession}`})
+  Places.aggregate([{$match: {sessionId: currentSession}},{'$group' : {_id:'$place', count:{$sum:1}}}, {$sort:{'count':-1}}])
     .then(results => {
       console.log('get popular is running');
       if(results) {
-        res.json(results);
+        console.log('POPULAR RESULTS', results);
+        if (results[0].count === results[1].count) {
+          const equalPopularityPlaces = results.filter(place => place.count === results[0].count);
+          res.json(equalPopularityPlaces[Math.floor(Math.random()*equalPopularityPlaces.length)]);
+        } else {
+          res.json(results[0]);
+        }
       } else {
         next();
       }
@@ -64,8 +68,6 @@ app.get('/api/results/:sessionId', (req, res, next) => {
       next(err);
     });
 });
-
-
 
 app.post('/api/places', (req, res, next) => {
   console.log('REQ BODY', req.body);
@@ -94,6 +96,18 @@ app.post('/api/session', (req, res, next) => {
     .catch(err => {
       next(err);
     });
+});
+
+app.delete('/api/places', (req, res, next) => {
+  const { deleteId, sessionId } = req.body;
+  Places.findByIdAndRemove(deleteId)
+    .then(() => {
+      res.status(204).end();
+    })
+    .catch(err => {
+      next(err);
+    });
+  
 });
 
 function runServer(port = PORT) {
