@@ -1,9 +1,15 @@
+require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const morgan = require('morgan');
 const Places = require('./models/places');
 const NewSession = require('./models/new-session');
 const bodyParser = require('body-parser');
+const fetch = require('node-fetch');
+
+const API_KEY = process.env.API_KEY;
+
+const BASE_BUSINESSES_URL = 'https://api.yelp.com/v3/businesses/search?term=mcdonalds&latitude=47.978985&longitude=-122.202079&limit=1';
 
 
 const { PORT, CLIENT_ORIGIN } = require('./config');
@@ -56,14 +62,31 @@ app.get('/api/results/:sessionId', (req, res, next) => {
         console.log('POPULAR RESULTS', results);
         if (results[0].count === results[1].count) {
           const equalPopularityPlaces = results.filter(place => place.count === results[0].count);
-          res.json(equalPopularityPlaces[Math.floor(Math.random()*equalPopularityPlaces.length)]);
+          return(equalPopularityPlaces[Math.floor(Math.random()*equalPopularityPlaces.length)]);
         } else {
-          res.json(results[0]);
+          return(results[0]);
         }
       } else {
         next();
       }
     })
+    .then(results => {
+      fetch(`https://api.yelp.com/v3/businesses/search?term=${results._id}&latitude=47.978985&longitude=-122.202079&limit=1`, {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${API_KEY}`
+        }
+      })
+        .then(response => {
+          if (response.ok) {
+            return response.json();} 
+          else {next();}})
+        .then(response => {
+          console.log('YELP RESULTS', response);
+          res.json(response);
+        });
+    })
+    
     .catch(err => {
       next(err);
     });
