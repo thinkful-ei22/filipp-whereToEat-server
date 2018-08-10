@@ -34,11 +34,12 @@ app.use(
   })
 );
 
-app.get('/api/places/:sessionId', (req, res, next) => {
-  const { sessionId } = req.params;
+app.get('/api/places/:sessionId/:userId', (req, res, next) => {
+  const { sessionId, userId } = req.params;
   const currentSession = sessionId;
+  const currentUser = userId;
   console.log('currentSession', currentSession);
-  Places.find({'sessionId':`${currentSession}`})
+  Places.find({'sessionId':`${currentSession}`, 'userId':`${currentUser}`})
     .then(results => {
       console.log('get all is running');
       if(results) {
@@ -60,7 +61,7 @@ app.get('/api/results/:sessionId', (req, res, next) => {
       console.log('get popular is running');
       if(results) {
         console.log('POPULAR RESULTS', results);
-        if (results[0].count === results[1].count) {
+        if (results[1] && results[0].count === results[1].count) {
           const equalPopularityPlaces = results.filter(place => place.count === results[0].count);
           return(equalPopularityPlaces[Math.floor(Math.random()*equalPopularityPlaces.length)]);
         } else {
@@ -80,9 +81,11 @@ app.get('/api/results/:sessionId', (req, res, next) => {
         .then(response => {
           if (response.ok) {
             return response.json();} 
-          else {next();}})
+          else {
+            next();
+          }
+        })
         .then(response => {
-          console.log('YELP RESULTS', response);
           res.json(response);
         });
     })
@@ -94,9 +97,9 @@ app.get('/api/results/:sessionId', (req, res, next) => {
 
 app.post('/api/places', (req, res, next) => {
   console.log('REQ BODY', req.body);
-  const { place, sessionId } = req.body;
+  const { place, sessionId, userId } = req.body;
 
-  const newPlace = { place, sessionId };
+  const newPlace = { place, sessionId, userId };
 
   Places.create(newPlace)
     .then(result => {
