@@ -8,7 +8,7 @@ const bodyParser = require('body-parser');
 const fetch = require('node-fetch');
 const {API_KEY} = require('./config.js');
 
-const BASE_BUSINESSES_URL = 'https://api.yelp.com/v3/businesses/search?term=mcdonalds&latitude=47.978985&longitude=-122.202079&limit=1';
+const BASE_BUSINESSES_URL = 'https://api.yelp.com/v3/businesses/search?term=mcdonalds&city=Everett&state=WA&limit=1';
 
 
 const { PORT, CLIENT_ORIGIN } = require('./config');
@@ -52,10 +52,10 @@ app.get('/api/places/:sessionId/:userId', (req, res, next) => {
     });
 });
 
-app.get('/api/results/:sessionId', (req, res, next) => {
-  const { sessionId } = req.params;
-  const currentSession = sessionId;
-  Places.aggregate([{$match: {sessionId: currentSession}},{'$group' : {_id:'$place', count:{$sum:1}}}, {$sort:{'count':-1}}])
+app.get('/api/results/:sessionId/:userLocation', (req, res, next) => {
+  const { sessionId, userLocation } = req.params;
+
+  Places.aggregate([{$match: {sessionId: sessionId}},{'$group' : {_id:'$place', count:{$sum:1}}}, {$sort:{'count':-1}}])
     .then(results => {
       console.log('get popular is running');
       if(results) {
@@ -71,7 +71,7 @@ app.get('/api/results/:sessionId', (req, res, next) => {
       }
     })
     .then(results => {
-      fetch(`https://api.yelp.com/v3/businesses/search?term=${results._id}&latitude=47.978985&longitude=-122.202079&limit=1`, {
+      fetch(`https://api.yelp.com/v3/businesses/search?term=${results._id}&location=${userLocation}&limit=1`, {
         method: 'GET',
         headers: {
           Authorization: `Bearer ${API_KEY}`
@@ -112,8 +112,9 @@ app.post('/api/places', (req, res, next) => {
 
 app.post('/api/session', (req, res, next) => {
   console.log('Create new session running');
+  const { userLocation } = req.body;
 
-  NewSession.create({active: true})
+  NewSession.create({userLocation: userLocation})
     .then(result => {
       console.log('RESULT', result);
       res.location(req.originalUrl).status(201).json(result);

@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 
 const sessionSchema = new mongoose.Schema({
   sessionId: { type: mongoose.Schema.Types.ObjectId },
-  active: false
+  userLocation: {type: String, required: true }
 });
 
 sessionSchema.set('toObject', {
