@@ -6,7 +6,8 @@ module.exports = {
         process.env.DATABASE_URL || 'mongodb://localhost:27017/where-to-eat',
   TEST_DATABASE_URL:
         process.env.TEST_DATABASE_URL ||
-        'mongodb://localhost/thinkful-backend-test'
+        'mongodb://localhost/thinkful-backend-test',
+  API_KEY: process.env.API_KEY
   // DATABASE_URL:
   //     process.env.DATABASE_URL || 'postgres://localhost/thinkful-backend',
   // TEST_DATABASE_URL:

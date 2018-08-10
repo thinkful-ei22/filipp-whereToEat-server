@@ -6,8 +6,7 @@ const Places = require('./models/places');
 const NewSession = require('./models/new-session');
 const bodyParser = require('body-parser');
 const fetch = require('node-fetch');
-
-const API_KEY = process.env.API_KEY;
+const {API_KEY} = require('./config.js');
 
 const BASE_BUSINESSES_URL = 'https://api.yelp.com/v3/businesses/search?term=mcdonalds&latitude=47.978985&longitude=-122.202079&limit=1';
 
